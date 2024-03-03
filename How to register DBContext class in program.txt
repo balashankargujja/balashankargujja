@@ -1,0 +1,1 @@
+builder.Services.AddDbContext(option =>option.UseSqlServer(builder.Configuration.GetConnectionString("CustomerDB"))); 
