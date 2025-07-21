@@ -362,3 +362,31 @@ Instead of manually setting HttpContext.Response.StatusCode, it's better to use 
 | 404 Not Found       | `return NotFound();`                       |
 | 500 Internal Error  | `return StatusCode(500, "Error message");` |
 
+
+# HttpContext.Response.Headers
+
+The Headers property of HttpContext.Response allows you to read or write HTTP response headers directly.
+
+Syntax:
+```c#
+HttpContext.Response.Headers["Header-Name"] = "value";
+```
+- The type is IHeaderDictionary
+- Used to set or get headers before the response is sent
+Example: Set a Custom Header
+```c#
+[HttpGet("custom-header")]
+public IActionResult AddCustomHeader()
+{
+    HttpContext.Response.Headers["X-Custom-Header"] = "MyValue";
+    return Ok("Header set");
+}
+```
+Response:
+```css
+HTTP/1.1 200 OK
+X-Custom-Header: MyValue
+```
+Important Rules
+- Headers must be set before the response body is written or started
+- You can overwrite existing headers, but some system-managed headers like Content-Length and Date may be ignored if modified
