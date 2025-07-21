@@ -305,3 +305,60 @@ public IActionResult MyAction()
 }
 ```
 Note: If you're using JsonResult or returning objects directly, ASP.NET Core will usually set the content type for you to application/json.
+
+### HttpContext.Response.StatusCode
+The StatusCode property lets you get or set the HTTP status code for the response that your API sends to the client.
+
+Syntax:
+```c#
+HttpContext.Response.StatusCode = 404;
+```
+It’s an int representing the HTTP status code (like 200, 404, 500, etc).
+#### Best Practices:
+- In controllers, prefer return StatusCode(404) or built-in helpers like NotFound(), BadRequest(), etc. Example:
+```c#
+return StatusCode(403);        // Custom code
+return NotFound();             // 404
+return Ok();                   // 200
+return BadRequest("Invalid");  // 400
+```
+- For non-controller classes (like middleware), directly set HttpContext.Response.StatusCode.
+```c#
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Unauthorized");
+        return;
+    }
+
+    await next();
+});
+```
+#### Tip:
+Use status codes according to HTTP standards. Some common ones:
+| Code | Meaning               |
+| ---- | --------------------- |
+| 200  | OK                    |
+| 201  | Created               |
+| 204  | No Content            |
+| 400  | Bad Request           |
+| 401  | Unauthorized          |
+| 403  | Forbidden             |
+| 404  | Not Found             |
+| 500  | Internal Server Error |
+
+#### Recommended Way in Controllers
+Instead of manually setting HttpContext.Response.StatusCode, it's better to use the built-in IActionResult return types for clarity and best practice.
+| Desired Status Code | Recommended Return                         |
+| ------------------- | ------------------------------------------ |
+| 200 OK              | `return Ok();` or `return Ok(data);`       |
+| 201 Created         | `return Created(uri, data);`               |
+| 204 No Content      | `return NoContent();`                      |
+| 400 Bad Request     | `return BadRequest();`                     |
+| 401 Unauthorized    | `return Unauthorized();`                   |
+| 403 Forbidden       | `return Forbid();`                         |
+| 404 Not Found       | `return NotFound();`                       |
+| 500 Internal Error  | `return StatusCode(500, "Error message");` |
+
