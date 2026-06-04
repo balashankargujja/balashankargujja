@@ -1,0 +1,694 @@
+# Deploying Shell and Remotes Independently in Angular NX Module Federation
+
+## Introduction
+
+One of the biggest advantages of Module Federation is:
+
+```text
+Independent Deployment
+```
+
+Without Module Federation:
+
+```text
+One Application
+One Build
+One Deployment
+```
+
+With Module Federation:
+
+```text
+Shell
+Customer Remote
+Admin Remote
+Reports Remote
+```
+
+Each application can be built and deployed independently.
+
+This is one of the primary reasons large enterprises adopt Micro Frontend Architecture.
+
+---
+
+# Traditional Monolithic Frontend
+
+Suppose we have:
+
+```text
+Customer Module
+Admin Module
+Reports Module
+Settings Module
+```
+
+inside a single Angular application.
+
+Structure:
+
+```text
+apps/
+|
+└── portal
+    |
+    ├── customer
+    ├── admin
+    ├── reports
+    └── settings
+```
+
+---
+
+## Deployment Process
+
+A small change is made in:
+
+```text
+Customer Module
+```
+
+Even then:
+
+```text
+Build Entire Application
+Deploy Entire Application
+```
+
+is required.
+
+---
+
+## Problems
+
+```text
+Long Build Times
+Long Deployment Times
+Higher Risk
+Large Teams Block Each Other
+```
+
+---
+
+# Micro Frontend Deployment
+
+With Module Federation:
+
+```text
+apps/
+|
+├── shell
+├── customer
+├── admin
+└── reports
+```
+
+Each application is independent.
+
+---
+
+# Deployment Architecture
+
+```text
+                 User
+                   |
+                   v
+
+             +-----------+
+             |   Shell   |
+             +-----------+
+                   |
+     -------------------------------
+     |             |              |
+     v             v              v
+
+ +---------+  +---------+  +---------+
+ |Customer |  | Admin   |  | Reports |
+ | Remote  |  | Remote  |  | Remote  |
+ +---------+  +---------+  +---------+
+```
+
+---
+
+# Example URLs
+
+## Shell
+
+```text
+https://portal.company.com
+```
+
+---
+
+## Customer Remote
+
+```text
+https://customer.company.com
+```
+
+---
+
+## Admin Remote
+
+```text
+https://admin.company.com
+```
+
+---
+
+## Reports Remote
+
+```text
+https://reports.company.com
+```
+
+---
+
+# Deployment Scenario
+
+Suppose Customer Team fixes a bug.
+
+Affected application:
+
+```text
+Customer Remote
+```
+
+---
+
+## Without Module Federation
+
+Required:
+
+```text
+Build Entire Portal
+Deploy Entire Portal
+```
+
+---
+
+## With Module Federation
+
+Required:
+
+```text
+Build Customer Remote
+Deploy Customer Remote
+```
+
+Only.
+
+Shell remains untouched.
+
+---
+
+# How Does Shell Know About the Remote?
+
+Shell loads:
+
+```text
+remoteEntry.js
+```
+
+from the Remote application.
+
+Example:
+
+```text
+https://customer.company.com/remoteEntry.js
+```
+
+When Customer Remote is redeployed:
+
+```text
+remoteEntry.js
+```
+
+is updated automatically.
+
+Shell loads the latest version.
+
+---
+
+# Development Environment
+
+## Shell
+
+```bash
+nx serve shell
+```
+
+Runs on:
+
+```text
+http://localhost:4200
+```
+
+---
+
+## Customer
+
+```bash
+nx serve customer
+```
+
+Runs on:
+
+```text
+http://localhost:4201
+```
+
+---
+
+## Admin
+
+```bash
+nx serve admin
+```
+
+Runs on:
+
+```text
+http://localhost:4202
+```
+
+---
+
+## Reports
+
+```bash
+nx serve reports
+```
+
+Runs on:
+
+```text
+http://localhost:4203
+```
+
+---
+
+# Production Environment
+
+## Shell
+
+```text
+https://portal.company.com
+```
+
+---
+
+## Customer
+
+```text
+https://customer.company.com
+```
+
+---
+
+## Admin
+
+```text
+https://admin.company.com
+```
+
+---
+
+## Reports
+
+```text
+https://reports.company.com
+```
+
+---
+
+# Team Ownership
+
+A common enterprise setup:
+
+```text
+Customer Team
+    |
+    └── Customer Remote
+
+Admin Team
+    |
+    └── Admin Remote
+
+Reports Team
+    |
+    └── Reports Remote
+
+Platform Team
+    |
+    └── Shell Application
+```
+
+Each team deploys independently.
+
+---
+
+# CI/CD Pipeline Example
+
+## Customer Remote Pipeline
+
+```text
+Code Commit
+      |
+      v
+
+Build Customer
+      |
+      v
+
+Run Tests
+      |
+      v
+
+Deploy Customer
+```
+
+---
+
+## Admin Remote Pipeline
+
+```text
+Code Commit
+      |
+      v
+
+Build Admin
+      |
+      v
+
+Run Tests
+      |
+      v
+
+Deploy Admin
+```
+
+---
+
+## Shell Pipeline
+
+```text
+Code Commit
+      |
+      v
+
+Build Shell
+      |
+      v
+
+Run Tests
+      |
+      v
+
+Deploy Shell
+```
+
+Each pipeline is independent.
+
+---
+
+# Benefits of Independent Deployment
+
+## Faster Releases
+
+```text
+Deploy Only What Changed
+```
+
+---
+
+## Smaller Builds
+
+```text
+Build One Application
+Instead of Four
+```
+
+---
+
+## Reduced Risk
+
+A Customer deployment does not affect:
+
+```text
+Admin
+Reports
+```
+
+---
+
+## Team Independence
+
+Teams release features whenever they are ready.
+
+---
+
+## Better Scalability
+
+Large organizations can scale development across many teams.
+
+---
+
+# Real Enterprise Example
+
+Imagine:
+
+```text
+Online Banking Portal
+```
+
+Applications:
+
+```text
+Accounts
+Payments
+Loans
+Credit Cards
+Investments
+Support
+```
+
+Each feature is developed by a different team.
+
+With Module Federation:
+
+```text
+Accounts Team Deploys Accounts
+
+Payments Team Deploys Payments
+
+Loans Team Deploys Loans
+```
+
+No coordination is required for every release.
+
+---
+
+# Deployment Challenge #1
+
+Version Compatibility
+
+Example:
+
+```text
+Shell -> Angular 20
+
+Customer -> Angular 18
+```
+
+Potential issues may occur.
+
+Solution:
+
+```typescript
+shared:
+{
+  '@angular/core':
+  {
+    singleton: true,
+    strictVersion: true
+  }
+}
+```
+
+---
+
+# Deployment Challenge #2
+
+Remote Unavailable
+
+Suppose:
+
+```text
+Customer Remote Server Down
+```
+
+Shell cannot load:
+
+```text
+remoteEntry.js
+```
+
+Result:
+
+```text
+Customer Module Fails
+```
+
+---
+
+## Recommended Handling
+
+Show:
+
+```text
+Customer Module Temporarily Unavailable
+```
+
+instead of crashing the application.
+
+---
+
+# Deployment Challenge #3
+
+Browser Caching
+
+User may still load an older:
+
+```text
+remoteEntry.js
+```
+
+after deployment.
+
+Common solutions:
+
+```text
+Cache Busting
+Versioning
+CDN Invalidation
+```
+
+---
+
+# Release Process Example
+
+## Step 1
+
+Developer changes Customer Remote.
+
+---
+
+## Step 2
+
+Customer CI/CD pipeline runs.
+
+---
+
+## Step 3
+
+Customer application deploys.
+
+---
+
+## Step 4
+
+New remoteEntry.js becomes available.
+
+---
+
+## Step 5
+
+Shell automatically loads the new version.
+
+No Shell deployment required.
+
+---
+
+# Recommended Enterprise Structure
+
+```text
+apps/
+|
+├── shell
+├── customer
+├── admin
+└── reports
+
+libs/
+|
+├── shared-auth
+├── shared-ui
+├── shared-config
+└── shared-models
+```
+
+Shared libraries remain reusable.
+
+Applications deploy independently.
+
+---
+
+# Interview Question
+
+## What is the benefit of deploying Shell and Remotes independently?
+
+### Answer
+
+Module Federation allows each Micro Frontend to be built and deployed separately. A change in one Remote application does not require rebuilding or redeploying the Shell or other Remotes. This enables faster releases, independent team ownership, reduced deployment risk, and better scalability.
+
+---
+
+# Quick Summary
+
+Traditional Frontend:
+
+```text
+One Application
+One Deployment
+```
+
+---
+
+Module Federation:
+
+```text
+Shell
+Customer Remote
+Admin Remote
+Reports Remote
+```
+
+Each application:
+
+```text
+Build Independently
+Test Independently
+Deploy Independently
+```
+
+---
+
+# Rule to Remember
+
+```text
+Change Customer
+        ↓
+Deploy Customer
+        ↓
+Shell Automatically Uses Latest Version
+```
+
+No need to redeploy:
+
+```text
+Shell
+Admin
+Reports
+```
+
+This is the core business value of Micro Frontend Architecture.
